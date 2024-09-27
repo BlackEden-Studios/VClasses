@@ -1,0 +1,9 @@
+name: ClassX
+version: '0.7-BETA'
+main: com.bestudios.classx.ClassX
+api-version: '1.20.6'
+depend:
+  - CoreX
+prefix: ClassX
+authors: [Bestialus]
+description: A new way to define your own custom classes
