@@ -1,29 +1,33 @@
 package com.bestudios.classx;
 
-import com.bestudios.classx.util.EquipCache;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
+import com.bestudios.classx.util.EquipmentCache;
+import com.bestudios.corex.utils.RoundSmartCache;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
-public class PlayersCache implements Listener {
+public class PlayersCache {
 
     private static final PlayersCache instance = new PlayersCache() ;
-    private PlayersCache() {}
+    private PlayersCache() {
+        ClassX.getInstance().toLog("Initializing the Players Cache", ClassX.getInstance().isDebugMode());
+        playerEquipCache = new RoundSmartCache<>(new PlayerCacheFactory());
+    }
     public static PlayersCache getInstance() { return instance; }
 
-    protected Map<UUID, EquipCache> playerEquipCache = new HashMap<>(ClassX.PREDICTED_MAX_PLAYERS);
+    protected RoundSmartCache<EquipmentCache> playerEquipCache;
 
-    public Map<UUID, EquipCache> getCache() {
-        return playerEquipCache;
+    public EquipmentCache getPlayerCache(UUID playerID) {
+        // ClassX.getInstance().toLog("Trying to retrieve the player cache for " + playerID, ClassX.getInstance().isDebugMode());
+        return playerEquipCache.get(playerID);
     }
 
-    @EventHandler (priority = EventPriority.LOWEST)
-    public void onPlayerLogin(PlayerLoginEvent event) {
-        playerEquipCache.put(event.getPlayer().getUniqueId(), new EquipCache());
+    public static class PlayerCacheFactory implements Supplier<EquipmentCache> {
+
+        @Override
+        public EquipmentCache get() {
+            ClassX.getInstance().toLog("Creating a new Equipment Cache", ClassX.getInstance().isDebugMode());
+            return new EquipmentCache();
+        }
     }
 }

@@ -1,74 +1,82 @@
 class_type:
   equip:
     head:
+    - armor:warrior_helmet
+    - armor:paladin_helmet
     chest:
+    - armor:warrior_chestplate
+    - armor:paladin_chestplate
     legs:
+    - armor:warrior_leggings
+    - armor:paladin_leggings
     feet:
+    - armor:warrior_boots
+    - armor:paladin_boots
   effect:
     absorption:
-      level:-1
+      level: 0
     bad_omen:
-      level:-1
+      level: 0
     blindness:
-      level:-1
+      level: 0
     conduit_power:
-      level:-1
+      level: 0
     darkness:
-      level:-1
+      level: 0
     dolphins_grace:
-      level:-1
+      level: 0
     fire_resistance:
-      level:-1
+      level: 0
     glowing:
-      level:-1
+      level: 0
     haste:
-      level:-1
+      level: 0
     health_boost:
-      level:-1
+      level: 0
     hero_of_the_village:
-      level:-1
+      level: 0
     hunger:
-      level:-1
+      level: 0
     instant_damage:
-      level:-1
+      level: 0
     instant_health:
-      level:-1
+      level: 0
     invisibility:
-      level:-1
+      level: 0
     jump_boost:
-      level:-1
+      level: 0
     levitation:
-      level:-1
+      level: 0
     luck:
-      level:-1
+      level: 0
     mining_fatigue:
-      level:-1
+      level: 0
     nausea:
-      level:-1
+      level: 0
     night_vision:
-      level:-1
+      level: 0
     poison:
-      level:-1
+      level: 0
     regeneration:
-      level:-1
+      level: 0
     resistance:
-      level:-1
+      level: 0
     saturation:
-      level:-1
+      level: 0
     slow_falling:
-      level:-1
+      level: 0
     slowness:
-      level:-1
+      level: 0
     speed:
-      level:-1
+      level: 0
     strength:
-      level:-1
+      level: 0
     unluck:
-      level:-1
+      level: 0
     water_breathing:
-      level:-1
+      level: 0
     weakness:
-      level:-1
+      level: 0
     wither:
-      level:-1
-    
+      level: 0
+

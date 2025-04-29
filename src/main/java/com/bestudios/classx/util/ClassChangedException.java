@@ -1,24 +1,36 @@
 package com.bestudios.classx.util;
 
-import com.bestudios.classx.Classes;
+import com.bestudios.classx.classes.RoleClassEnum;
 
 public class ClassChangedException extends Exception{
 
-    private final Classes newClass;
+    private final RoleClassEnum _newRoleClass;
 
-    private final Classes previousClass;
+    private final RoleClassEnum _formerRoleClass;
 
-    public ClassChangedException(Classes newClassType, Classes previousClassType) {
+    /**
+        Exception thrown when a player changes their role-class
+        by wearing a different set of armor items
+     */
+    protected ClassChangedException(RoleClassEnum newClassType, RoleClassEnum formerClassType) {
         super();
-        newClass = newClassType;
-        previousClass = previousClassType;
+        _newRoleClass = newClassType;
+        _formerRoleClass = formerClassType;
     }
 
-    public Classes getNewClass() {
-        return newClass;
+    /**
+     *
+     * @return The enum referred to the role-class the player is changing into
+     */
+    public RoleClassEnum getNewClassType() {
+        return _newRoleClass;
     }
 
-    public Classes getPreviousClass() {
-        return previousClass;
+    /**
+     *
+     * @return The enum referred to player's role-class before the change
+     */
+    public RoleClassEnum getFormerClassType() {
+        return _formerRoleClass;
     }
 }

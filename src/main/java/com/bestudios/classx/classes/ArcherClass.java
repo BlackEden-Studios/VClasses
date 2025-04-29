@@ -1,9 +1,9 @@
 package com.bestudios.classx.classes;
 
-import com.bestudios.classx.Classes;
 import com.bestudios.classx.ClassX;
 import com.bestudios.classx.PlayersCache;
 import com.bestudios.classx.ClassXSettingsManager;
+import com.bestudios.corex.utils.SmartCache;
 import com.bestudios.corex.utils.TimerInfo;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
@@ -15,42 +15,45 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-public class ArcherClass extends ClassType {
+public class ArcherClass extends RoleClassType {
 
     /**
      * Instance variable, intended to be used as Singleton reference
      */
-    protected static ClassType instance = new ArcherClass();
+    protected static RoleClassType instance = new ArcherClass();
 
     /**
      * Private constructor for the Singleton
      */
-    private ArcherClass() { super("archer.yml", Classes.ARCHER); }
+    private ArcherClass() { super("archer.yml", RoleClassEnum.ARCHER); }
 
     /**
      * The only way to retrieve the class instance
      * @return instance of the class
      */
-    public static ClassType getInstance() { return instance; }
+    public static RoleClassType getInstance() { return instance; }
 
+    /**
+     * Archer ability weakening duration in seconds
+     */
     private int taggedTime = 10;
-    private void setTaggedTime(int value) { if(value != 0) taggedTime = value; }
+    private void setTaggedTime(int value) { if (value != 0) taggedTime = value; }
 
+    /**
+     * Archer ability bonus damage, to apply as a multiplier on the ordinary damage
+     */
     private double damageMultiplier = 0.2;
-    private void setDamageMultiplier(int value) { if(value != 0) damageMultiplier = (double) value /10 ; }
+    private void setDamageMultiplier(int value) { if (value != 0) damageMultiplier = (double) value /10 ; }
 
-    private final Map<UUID, TimerInfo> taggedByArcher = new HashMap<>();
-
-    private final Map<UUID, TimerInfo> classInitialCooldownCache = new HashMap<>();
-
-    @Override
-    public void setClassOnCooldown(Player player) {
-        classInitialCooldownCache.put(player.getUniqueId(), new TimerInfo(ClassXSettingsManager.getInstance().getClassActivationCooldown()));
-    }
+    /**
+     * Amplifier for the potion effect given when hitting a previously weakened target
+     */
+    private int buffAmplifier = 2;
+    private void setBuffAmplifier(int value) { if (value != 0) buffAmplifier = value-1; }
+    /**
+     * Smart cache for the entities that are weakened by the archer ability
+     */
+    private final SmartCache<TimerInfo> taggedByArcher = new SmartCache<>();
 
     /**
      * Implementation of the Archer class ability ;
@@ -62,42 +65,41 @@ public class ArcherClass extends ClassType {
     @Override
     public void classAbility() {
 
+        /*
+            Listener for applying the tag to an entity
+         */
         ClassX.getInstance().getPluginManager().registerEvents(new Listener() {
             @EventHandler (priority = EventPriority.HIGHEST)
             public void onArrowHitByArcher(EntityDamageByEntityEvent event) {
                 if (!(event.getDamager() instanceof Arrow arrow)) return;
-                ClassX.getInstance().toLog("Damage Source is an Arrow", debug);
                 if (!(arrow.getShooter() instanceof Player attackerPlayer)) return;
-                ClassX.getInstance().toLog("Damager is a Player", debug);
-                if (PlayersCache.getInstance().getCache().get(attackerPlayer.getUniqueId()).getCurrentClass() != Classes.ARCHER) return;
-                ClassX.getInstance().toLog("Player is an archer", debug);
-                TimerInfo activationTimer = classInitialCooldownCache.get(attackerPlayer.getUniqueId());
+                if (PlayersCache.getInstance().getPlayerCache(attackerPlayer.getUniqueId()).getCurrentClass() != RoleClassEnum.ARCHER) return;
+                TimerInfo activationTimer = cooldownCache.get(attackerPlayer.getUniqueId());
                 if (activationTimer != null) {
                     if (activationTimer.isValid()) return;
-                    else classInitialCooldownCache.remove(attackerPlayer.getUniqueId());
-                    ClassX.getInstance().toLog("Archer is not on cooldown", debug);
+                    else cooldownCache.remove(attackerPlayer.getUniqueId());
                 } if (event.isCancelled()) return;
                 if (ArcherClass.getInstance().isDisabled()) return;
                 if (!(event.getEntity() instanceof LivingEntity damagedEntity)) return;
-                ClassX.getInstance().toLog("Archer has hit a living entity", debug);
                 TimerInfo entry = taggedByArcher.get(damagedEntity.getUniqueId());
-                if(entry != null && entry.isValid()) {
-                    ClassX.getInstance().toLog("Entity was already weakened, setting the effect for the Player", debug);
-                    attackerPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * taggedTime, 2));
-                }
+                if (entry != null && entry.isValid())
+                    attackerPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * taggedTime, buffAmplifier));
                 taggedByArcher.put(damagedEntity.getUniqueId(), new TimerInfo(taggedTime));
                 damagedEntity.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20 * taggedTime, 0));
             }
 
         }, ClassX.getInstance());
 
+        /*
+            Listener for dealing bonus damage to weakened entities
+         */
         ClassX.getInstance().getPluginManager().registerEvents(new Listener() {
             @EventHandler (priority = EventPriority.HIGH)
             public void onWeakBeingHit(EntityDamageByEntityEvent event) {
                 if (event.isCancelled()) return;
-                if(event.getEntity() instanceof LivingEntity damagedEntity) {
+                if (event.getEntity() instanceof LivingEntity damagedEntity) {
                     TimerInfo entry = taggedByArcher.get(damagedEntity.getUniqueId());
-                    if ((entry != null) && (entry.isValid())) {
+                    if (entry != null && entry.isValid()) {
                         double finalDMG = event.getFinalDamage();
                         damagedEntity.damage(damageMultiplier * finalDMG);
                         ClassX.getInstance().toLog("A weakened entity has been hit for " + finalDMG + " base damages + " + finalDMG * damageMultiplier + " bonus damages", debug);
@@ -108,23 +110,27 @@ public class ArcherClass extends ClassType {
             }
         }, ClassX.getInstance());
 
+        /*
+            Listener for removing the dead entities
+         */
         ClassX.getInstance().getPluginManager().registerEvents(new Listener() {
             @EventHandler (priority = EventPriority.HIGH)
             public void onWeakDeath(EntityDeathEvent event) {
                 if (event.isCancelled()) return;
-                if (event.getEntity() instanceof LivingEntity deadEntity) {
-                    taggedByArcher.remove(deadEntity.getUniqueId());
-                }
+                LivingEntity deadEntity = event.getEntity();
+                taggedByArcher.remove(deadEntity.getUniqueId());
             }
         }, ClassX.getInstance());
 
     }
 
     @Override
-    protected void classConfiguration() {
+    public void setUpConfigs() {
+        super.setUpConfigs();
         YamlConfiguration config = ClassXSettingsManager.getInstance().getConfig();
 
         setTaggedTime( config.getInt("archer_class_tag_time"));
         setDamageMultiplier( config.getInt("archer_class_damage_multiplier"));
+        setBuffAmplifier( config.getInt("archer_class_buff_effect_level"));
     }
 }

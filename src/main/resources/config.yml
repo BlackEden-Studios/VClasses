@@ -1,13 +1,12 @@
 debug: false
+max_activation_queue_operations: 5
 class_activation_cooldown: 10
-custom_food_cooldown: 300
-custom_potion_cooldown: 300
 ##############################################################
 #                       Archer Class                         #
 ##############################################################
 archer_class_tag_time: 10
 # Damage multiplier should be an integer, the percentile is handled internally
-archer_class_damage_multiplier: 5
+archer_class_damage_multiplier: 7
 ##############################################################
 #                         Bard Class                         #
 ##############################################################

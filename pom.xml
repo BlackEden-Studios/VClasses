@@ -6,7 +6,7 @@
 
   <groupId>com.bestudios</groupId>
   <artifactId>ClassX</artifactId>
-  <version>0.7-BETA</version>
+  <version>0.8-BETA</version>
   <packaging>jar</packaging>
 
   <name>ClassX</name>
@@ -98,7 +98,7 @@
       <dependency>
           <groupId>com.bestudios</groupId>
           <artifactId>CoreX</artifactId>
-          <version>0.1-BETA</version>
+          <version>0.2-BETA</version>
           <scope>provided</scope>
       </dependency>
   </dependencies>

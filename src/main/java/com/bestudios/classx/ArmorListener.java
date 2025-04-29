@@ -1,27 +1,25 @@
 package com.bestudios.classx;
 
+import com.bestudios.classx.classes.RoleClassEnum;
+import com.bestudios.classx.util.ClassActivationEntry;
+import com.bestudios.classx.util.ClassActivationQueue;
 import com.bestudios.classx.util.ClassChangedException;
-import com.bestudios.classx.util.DefaultClassActivationRunnable;
-import com.bestudios.classx.util.TaskCancellationEvent;
-import com.bestudios.corex.CoreX;
+import com.bestudios.corex.managers.HooksManager;
+import com.bestudios.corex.utils.BEPlugin;
+import com.bestudios.corex.utils.TimerInfo;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
-import dev.lone.itemsadder.api.ItemsAdder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public class ArmorListener implements Listener {
-
-    private final boolean debug;
     private final static ArmorListener instance = new ArmorListener();
     /* Private Constructor */
     private ArmorListener() {
@@ -29,77 +27,52 @@ public class ArmorListener implements Listener {
     }
     public static ArmorListener getInstance() { return instance; }
 
-    private final Map<String, Classes> classesUnifiedCache = new HashMap<>() {{
-        put("minecraft:air", Classes.NONE);
+    private final boolean debug;
+
+    private final Map<String, RoleClassEnum> equipmentUnifiedCache = new HashMap<>() {{
+        put("minecraft:air", RoleClassEnum.NONE);
     }};
-    public void loadUnifiedCache(Map<String, Classes> append) {
-        classesUnifiedCache.putAll(append);
-    }
-
-    private final Map<UUID, DefaultClassActivationRunnable> activationTaskMap = new HashMap<>(ClassX.PREDICTED_MAX_PLAYERS);
-
-    private void cancelTask(Player player) {
-        try {
-            activationTaskMap.get(player.getUniqueId()).cancel();
-            activationTaskMap.remove(player.getUniqueId());
-        } catch (Exception ignored) { }
-    }
-
-    private String itemToString(ItemStack item) {
-        if (ItemsAdder.isCustomItem(item))
-            return ItemsAdder.getCustomItemName(item);
-        else {
-            return item.getType().getKey().toString();
-        }
+    public void loadUnifiedCache(Map<String, RoleClassEnum> append) {
+        equipmentUnifiedCache.putAll(append);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onItemsAdderLoad(ItemsAdderLoadDataEvent event) {
-        if (CoreX.getInstance().getDependencyManager().isItemsAdderLoaded()) return;
+        // Check if the event has been fired after an IA reload
+        if (event.getCause().equals(ItemsAdderLoadDataEvent.Cause.RELOAD)) return;
         ClassX.getInstance().toLog("ItemsAdder is being loaded for the first time, registering the Armor Listener", debug);
+        // Register the listener that handles the Player Armor Change
         ClassX.getInstance().getPluginManager().registerEvents(new Listener() {
             @EventHandler(priority = EventPriority.HIGH)
             public void onArmorChange(PlayerArmorChangeEvent event) {
+                // References captured for performances and readability
                 Player player = event.getPlayer();
-                if (ItemsAdder.areItemsLoaded()) {
-                    try {
-                        ClassX.getInstance().toLog("Starting updating the Armor Cache for player " + player.getName(), debug);
-                        Classes newItem = classesUnifiedCache.get(itemToString(event.getNewItem()));
-                        ClassX.getInstance().toLog("New item is class " + newItem , debug);
-                        Classes oldItem = classesUnifiedCache.get(itemToString(event.getOldItem()));
-                        ClassX.getInstance().toLog("Old item is class " + oldItem , debug);
-                        if (!Objects.equals(newItem.toString(), oldItem.toString()))
-                            PlayersCache.getInstance().getCache().get(player.getUniqueId()).updateCache( newItem, oldItem );
-                    } catch (ClassChangedException e) {
-                        ClassX.getInstance().toLog("Catched a ClassChangedException for player " + player.getName() + " changing to class " + e.getNewClass().toString(), debug);
-                        //If the class is changed, clear all potion buffs
-                        for(PotionEffect effect : player.getActivePotionEffects()) {
-                            ClassX.getInstance().toLog("Removing potion effect " + effect.toString() + " for player " + player.toString(), debug);
-                            player.removePotionEffect( effect.getType() );
-                        } cancelTask(player);
-                        ClassX.implementedClasses.get(e.getPreviousClass()).classDismissed(player);
-                        //If the class is defined, add the respective buffs to the player
-                        if(e.getNewClass() != Classes.NONE) {
-                            ClassX.getInstance().toLog("Detected a change to a specific class", debug);
-                            ClassX.implementedClasses.get(e.getNewClass()).setClassOnCooldown(player);
-                            ClassX.getInstance().toLog("Class ability has been put on cooldown", debug);
-                            DefaultClassActivationRunnable previousTask = activationTaskMap.get(player.getUniqueId());
-                            if (previousTask != null) previousTask.cancel();
-                            DefaultClassActivationRunnable task = new DefaultClassActivationRunnable(player, e.getNewClass());
-                            task.runTaskTimerAsynchronously(ClassX.getInstance(),1,20);
-                            activationTaskMap.put(player.getUniqueId(),task);
-                            ClassX.getInstance().toLog("The class activation runnable timer has been scheduled", debug);
-                        }
+                BEPlugin pluginRef = ClassX.getInstance();
+                RoleClassEnum newRole = equipmentUnifiedCache.get(HooksManager.getItemName(event.getNewItem()));
+                RoleClassEnum oldRole = equipmentUnifiedCache.get(HooksManager.getItemName(event.getOldItem()));
+                // If the items are not mapped, the role class is set to None
+                if (newRole == null) newRole = RoleClassEnum.NONE;
+                if (oldRole == null) oldRole = RoleClassEnum.NONE;
+                try { // If the items are representatives of different role-classes, update the cache
+                    if (!Objects.equals(newRole.toString(), oldRole.toString())) {
+                        pluginRef.toLog("Cache updated for " + player.getName() + " : " + oldRole + " -> " + newRole, debug);
+                        PlayersCache.getInstance().getPlayerCache(player.getUniqueId()).updateCache(newRole, oldRole);
                     }
-                } // else event.setCancelled(true);
-            }
+                } catch (ClassChangedException e) {
 
-            @EventHandler(priority = EventPriority.HIGH)
-            public void onTaskCancellation(TaskCancellationEvent event) {
-                if (event.getReceiver() == ArmorListener.getInstance()) {
-                    DefaultClassActivationRunnable task = activationTaskMap.get(event.getPlayer().getUniqueId());
-                    if (task != null) task.cancel();
-                    activationTaskMap.remove(event.getPlayer().getUniqueId());
+                    // Logic to execute when a role-class change exception is caught
+                    pluginRef.toLog("Catched a ClassChangedException for player " + player.getName() + " changing to role-class " + e.getNewClassType().toString(), debug);
+                    // Clear all potion effects
+                    for(PotionEffect effect : ClassX.implementedClasses.get(e.getFormerClassType()).classPotionEffectsPrivateCache) player.removePotionEffect(effect.getType());
+                    // Dismiss the former role-class for the player
+                    ClassX.implementedClasses.get(e.getFormerClassType()).dismissRoleClass(player);
+                    // Set the ability class on cooldown
+                    ClassX.implementedClasses.get(e.getNewClassType()).setClassOnCooldown(player);
+                    // Queue the activation
+                    ClassActivationQueue.getInstance().getInQueue(new ClassActivationEntry(
+                            player, e.getNewClassType(), new TimerInfo(ClassXSettingsManager.getInstance().getClassActivationCooldown())
+                    ));
+                    pluginRef.toLog("A class activation has been queued", debug);
                 }
             }
 

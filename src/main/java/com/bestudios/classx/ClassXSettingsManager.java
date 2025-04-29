@@ -20,8 +20,8 @@ public class ClassXSettingsManager extends ConfigLoader {
      * The method load() gets the config values from the file "config.yml" and saves them into the config object
      */
     @Override
-    public void load() {
-        super.load();
+    public void setUpConfigs() {
+        super.setUpConfigs();
         debug = this.getConfig().getBoolean("debug");
         classActivationCooldown = this.getConfig().getInt("class_activation_cooldown");
     }

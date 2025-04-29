@@ -1,9 +1,9 @@
 name: ClassX
-version: '0.7-BETA'
+version: '0.8-BETA'
 main: com.bestudios.classx.ClassX
 api-version: '1.20.6'
-depend:
-  - CoreX
+depend: [CoreX]
 prefix: ClassX
 authors: [Bestialus]
-description: A new way to define your own custom classes
+description: A new way to define your own custom role classes (part of the CraftX plugins family)
+website: https://github.com/BlackEden-Studios
