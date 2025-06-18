@@ -41,7 +41,7 @@ jobs:
         username: ${{ secrets.PROD_USERNAME }}
         key: ${{ secrets.PROD_SSH_KEY }}
         port: ${{ secrets.PROD_PORT }}    
-        source: "target/CoreX-*.jar"
+        source: "target/ClassX-*.jar"
         target: "/var/lib/pterodactyl/volumes/1b3855aa-4ccb-49a6-9431-090524c1239a/plugins/"  # Your production server path
         strip_components: 1
 
@@ -52,7 +52,7 @@ jobs:
         username: ${{ secrets.PROD_USERNAME }}
         key: ${{ secrets.PROD_SSH_KEY }}
         port: ${{ secrets.PROD_PORT }}
-        source: "target/CoreX-*.jar"
+        source: "target/ClassX-*.jar"
         target: "/var/lib/pterodactyl/volumes/58874410-387a-44a5-bb01-6664c913ed1c/plugins/"  # Your production server path
         strip_components: 1
     
