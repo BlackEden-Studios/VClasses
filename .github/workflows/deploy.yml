@@ -1,0 +1,59 @@
+name: Build and Deploy to Production
+
+on:
+  push:
+    branches: [ master ] 
+  pull_request:
+    branches: [ master ]
+    types: [ closed ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'  # Adjust to your Java version
+        distribution: 'temurin'
+    
+    - name: Cache Maven dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    - name: Run tests
+      run: mvn clean test
+    
+    - name: Build with Maven
+      run: mvn clean package -DskipTests
+    
+    - name: Deploy to Instances Server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USERNAME }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        port: ${{ secrets.PROD_PORT }}    
+        source: "target/CoreX-*.jar"
+        target: "/var/lib/pterodactyl/volumes/1b3855aa-4ccb-49a6-9431-090524c1239a/plugins/"  # Your production server path
+        strip_components: 1
+
+    - name: Deploy to Towny Server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USERNAME }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        port: ${{ secrets.PROD_PORT }}
+        source: "target/CoreX-*.jar"
+        target: "/var/lib/pterodactyl/volumes/58874410-387a-44a5-bb01-6664c913ed1c/plugins/"  # Your production server path
+        strip_components: 1
+    
+    
