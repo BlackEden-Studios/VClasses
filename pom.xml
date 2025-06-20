@@ -6,7 +6,7 @@
 
   <groupId>com.bestudios</groupId>
   <artifactId>ClassX</artifactId>
-  <version>0.9</version>
+  <version>0.9-BETA</version>
   <packaging>jar</packaging>
 
   <name>ClassX</name>
