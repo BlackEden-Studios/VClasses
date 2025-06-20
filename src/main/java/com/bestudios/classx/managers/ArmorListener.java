@@ -1,12 +1,14 @@
-package com.bestudios.classx;
+package com.bestudios.classx.managers;
 
+import com.bestudios.classx.ClassX;
+import com.bestudios.classx.caches.PlayersCache;
 import com.bestudios.classx.classes.RoleClassEnum;
 import com.bestudios.classx.util.ClassActivationEntry;
 import com.bestudios.classx.util.ClassActivationQueue;
 import com.bestudios.classx.util.ClassChangedException;
 import com.bestudios.corex.managers.HooksManager;
-import com.bestudios.corex.utils.BEPlugin;
-import com.bestudios.corex.utils.TimerInfo;
+import com.bestudios.corex.basics.BEPlugin;
+import com.bestudios.corex.basics.TimerInfo;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import dev.lone.itemsadder.api.Events.ItemsAdderLoadDataEvent;
 import org.bukkit.entity.Player;

@@ -12,7 +12,7 @@ public class ClassChangedException extends Exception{
         Exception thrown when a player changes their role-class
         by wearing a different set of armor items
      */
-    protected ClassChangedException(RoleClassEnum newClassType, RoleClassEnum formerClassType) {
+    public ClassChangedException(RoleClassEnum newClassType, RoleClassEnum formerClassType) {
         super();
         _newRoleClass = newClassType;
         _formerRoleClass = formerClassType;

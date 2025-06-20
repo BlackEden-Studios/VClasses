@@ -1,12 +1,12 @@
 package com.bestudios.classx.classes;
 
-import com.bestudios.classx.ArmorListener;
+import com.bestudios.classx.managers.ArmorListener;
 import com.bestudios.classx.ClassX;
-import com.bestudios.classx.ClassXSettingsManager;
-import com.bestudios.corex.utils.ConfigLoader;
+import com.bestudios.classx.managers.ClassXSettingsManager;
+import com.bestudios.corex.basics.ConfigLoader;
 import com.bestudios.corex.utils.EffectsLibrary;
-import com.bestudios.corex.utils.SmartCache;
-import com.bestudios.corex.utils.TimerInfo;
+import com.bestudios.corex.caches.SmartCache;
+import com.bestudios.corex.basics.TimerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;

@@ -1,10 +1,10 @@
 package com.bestudios.classx.classes;
 
 import com.bestudios.classx.ClassX;
-import com.bestudios.classx.PlayersCache;
-import com.bestudios.classx.ClassXSettingsManager;
-import com.bestudios.corex.utils.SmartCache;
-import com.bestudios.corex.utils.TimerInfo;
+import com.bestudios.classx.caches.PlayersCache;
+import com.bestudios.classx.managers.ClassXSettingsManager;
+import com.bestudios.corex.caches.SmartCache;
+import com.bestudios.corex.basics.TimerInfo;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;

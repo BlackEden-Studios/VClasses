@@ -1,7 +1,7 @@
 package com.bestudios.classx.util;
 
 import com.bestudios.classx.classes.RoleClassEnum;
-import com.bestudios.corex.utils.TimerInfo;
+import com.bestudios.corex.basics.TimerInfo;
 import org.bukkit.entity.Player;
 
 public class ClassActivationEntry {

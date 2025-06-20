@@ -1,7 +1,7 @@
-package com.bestudios.classx;
+package com.bestudios.classx.caches;
 
-import com.bestudios.classx.util.EquipmentCache;
-import com.bestudios.corex.utils.RoundSmartCache;
+import com.bestudios.classx.ClassX;
+import com.bestudios.corex.caches.RoundSmartCache;
 
 import java.util.UUID;
 import java.util.function.Supplier;

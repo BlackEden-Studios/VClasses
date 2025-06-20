@@ -2,7 +2,7 @@ package com.bestudios.classx.util;
 
 import com.bestudios.classx.ClassX;
 import com.bestudios.classx.classes.RoleClassEnum;
-import com.bestudios.corex.utils.SmartCache;
+import com.bestudios.corex.caches.SmartCache;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -50,9 +50,9 @@ public class ClassActivationQueue extends BukkitRunnable{
                 player.addPotionEffect(potionEffect);
             }
 
-            player.sendMessage(Component.text("Le caratteristiche di classe sono ora attive!")
-                    .color(TextColor.color(0x008000))
-                    .decoration(TextDecoration.BOLD, true)
+            player.sendMessage(Component.text(ClassX.LANGUAGES.getMessage("class_activation_success"))
+                                        .color(TextColor.color(0x008000))
+                                        .decoration(TextDecoration.BOLD, true)
             );
 
             interruptedActivations.remove(player.getUniqueId());

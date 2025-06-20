@@ -1,12 +1,12 @@
 package com.bestudios.classx.classes;
 
 import com.bestudios.classx.ClassX;
-import com.bestudios.classx.ClassXSettingsManager;
-import com.bestudios.classx.PlayersCache;
+import com.bestudios.classx.managers.ClassXSettingsManager;
+import com.bestudios.classx.caches.PlayersCache;
 import com.bestudios.classx.util.BardBuffRunnable;
 import com.bestudios.corex.managers.HooksManager;
-import com.bestudios.corex.utils.SmartCache;
-import com.bestudios.corex.utils.TimerInfo;
+import com.bestudios.corex.caches.SmartCache;
+import com.bestudios.corex.basics.TimerInfo;
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -187,7 +187,7 @@ public class BardClass extends RoleClassType {
                     // Check the cooldown
                     TimerInfo entry = cooldownCache.get(player.getUniqueId());
                     if (entry != null && entry.isValid()) {
-                        player.sendMessage(Component.text("Il corno è in cooldown")
+                        player.sendMessage(Component.text(ClassX.LANGUAGES.getMessage("bard.horn_cooldown_message"))
                                                     .color(TextColor.color(0xff0000))
                                                     .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
                                                                                       Component.text("Bard Class")

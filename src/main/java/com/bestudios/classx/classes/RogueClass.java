@@ -1,10 +1,10 @@
 package com.bestudios.classx.classes;
 
 import com.bestudios.classx.ClassX;
-import com.bestudios.classx.PlayersCache;
-import com.bestudios.classx.ClassXSettingsManager;
+import com.bestudios.classx.caches.PlayersCache;
+import com.bestudios.classx.managers.ClassXSettingsManager;
 import com.bestudios.corex.managers.HooksManager;
-import com.bestudios.corex.utils.TimerInfo;
+import com.bestudios.corex.basics.TimerInfo;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
@@ -15,9 +15,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.Objects;
 
 public class RogueClass extends RoleClassType {
 
@@ -58,11 +55,11 @@ public class RogueClass extends RoleClassType {
                 if (custom) {
                     // Check if the player class is Rogue
                     if ((PlayersCache.getInstance().getPlayerCache(player.getUniqueId()).getCurrentClass() != RoleClassEnum.ROGUE)) {
-                        player.sendMessage(Component.text("Non hai l'armatura adatta")
-                                .color(TextColor.color(0xff0000))
-                                .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                        Component.text("Rogue Class")
-                                                .color(TextColor.color(0x008000)))));
+                        player.sendMessage(Component.text(ClassX.LANGUAGES.getMessage("class_action_not_allowed"))
+                                                    .color(TextColor.color(0xff0000))
+                                                    .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                                                Component.text("Rogue Class")
+                                                                         .color(TextColor.color(0x008000)))));
                         event.setCancelled(true);
                         return;
                     }
@@ -74,11 +71,11 @@ public class RogueClass extends RoleClassType {
                     // Check if there is an active cooldown
                     TimerInfo entry = cooldownCache.get(player.getUniqueId());
                     if (entry != null && entry.isValid()) {
-                        player.sendMessage(Component.text("Il coltello è in cooldown")
-                                .color(TextColor.color(0xff0000))
-                                .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                        Component.text("Rogue Class")
-                                                .color(TextColor.color(0x008000)))));
+                        player.sendMessage(Component.text(ClassX.LANGUAGES.getMessage("rogue.knife_cooldown_message"))
+                                                    .color(TextColor.color(0xff0000))
+                                                    .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                                                Component.text("Rogue Class")
+                                                                         .color(TextColor.color(0x008000)))));
                         event.setCancelled(true);
                     } else {
                         // The ability use is valid

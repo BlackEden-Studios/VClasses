@@ -1,6 +1,7 @@
-package com.bestudios.classx;
+package com.bestudios.classx.managers;
 
-import com.bestudios.corex.utils.ConfigLoader;
+import com.bestudios.classx.ClassX;
+import com.bestudios.corex.basics.ConfigLoader;
 
 public class ClassXSettingsManager extends ConfigLoader {
     private final static ClassXSettingsManager instance = new ClassXSettingsManager();
@@ -11,7 +12,7 @@ public class ClassXSettingsManager extends ConfigLoader {
     public static ClassXSettingsManager getInstance() { return instance; }
 
     private boolean debug = false;
-    protected boolean getDebugConfig() { return debug; }
+    public boolean getDebugConfig() { return debug; }
 
     private int classActivationCooldown = 0;
     public int getClassActivationCooldown() { return classActivationCooldown; }

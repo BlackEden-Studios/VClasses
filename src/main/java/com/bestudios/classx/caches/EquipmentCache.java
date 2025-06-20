@@ -1,8 +1,9 @@
-package com.bestudios.classx.util;
+package com.bestudios.classx.caches;
 
 import com.bestudios.classx.classes.RoleClassEnum;
 import com.bestudios.classx.ClassX;
 import com.bestudios.classx.classes.RoleClassType;
+import com.bestudios.classx.util.ClassChangedException;
 
 import java.util.HashMap;
 import java.util.Map;
