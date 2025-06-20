@@ -1,8 +1,8 @@
-name: Build and Deploy to Production
+name: Build and Deploy Minecraft Plugin
 
 on:
   push:
-    branches: [ master ] 
+    branches: [ master ]
   pull_request:
     branches: [ master ]
     types: [ closed ]
@@ -11,49 +11,115 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     
+    # Only run deployment on push to master or merged PRs to master
+    if: github.ref == 'refs/heads/master' && (github.event_name == 'push' || github.event.pull_request.merged == true)
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+      
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        java-version: '21'  # Adjust to your Java version
+        java-version: '21'
         distribution: 'temurin'
-    
+        
     - name: Cache Maven dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v3
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
-    
-    - name: Run tests
-      run: mvn clean test
-    
+        
     - name: Build with Maven
-      run: mvn clean package -DskipTests
-    
-    - name: Deploy to Instances Server
-      uses: appleboy/scp-action@v0.1.7
+      run: mvn clean compile package -DskipTests
+      
+    - name: Get artifact name
+      id: get-artifact
+      run: |
+        ARTIFACT_NAME=$(mvn help:evaluate -Dexpression=project.build.finalName -q -DforceStdout)
+        echo "artifact_name=${ARTIFACT_NAME}.jar" >> $GITHUB_OUTPUT
+        echo "Found artifact: ${ARTIFACT_NAME}.jar"
+        
+    - name: Verify artifact exists
+      run: |
+        if [ ! -f "target/${{ steps.get-artifact.outputs.artifact_name }}" ]; then
+          echo "Artifact not found: target/${{ steps.get-artifact.outputs.artifact_name }}"
+          ls -la target/
+          exit 1
+        fi
+        echo "Artifact verified: target/${{ steps.get-artifact.outputs.artifact_name }}"
+        
+    - name: Deploy to Production Server
+      uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.PROD_HOST }}
         username: ${{ secrets.PROD_USERNAME }}
         key: ${{ secrets.PROD_SSH_KEY }}
-        port: ${{ secrets.PROD_PORT }}    
-        source: "target/ClassX-*.jar"
-        target: "/var/lib/pterodactyl/volumes/1b3855aa-4ccb-49a6-9431-090524c1239a/plugins/"  # Your production server path
+        port: ${{ secrets.PROD_PORT || 22 }}
+        script: |
+          # Create a temporary directory for the upload
+          mkdir -p /tmp/minecraft-plugin-deploy
+          
+    - name: Upload plugin to server
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USERNAME }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        port: ${{ secrets.PROD_PORT || 22 }}
+        source: "target/${{ steps.get-artifact.outputs.artifact_name }}"
+        target: "/tmp/minecraft-plugin-deploy/"
         strip_components: 1
+        
+    - name: Move plugin to servers location
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USERNAME }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        port: ${{ secrets.PROD_PORT || 22 }}
+        script: |
+          # Define paths
+          TEMP_DIR="/tmp/minecraft-plugin-deploy"
+          PLUGIN_DIR_INSTANCES="/var/lib/pterodactyl/volumes/${{ secrets.INSTANCES_SERVER_ID }}/plugins"
+          PLUGIN_FILE="${{ steps.get-artifact.outputs.artifact_name }}"
+          
+          # Check if the uploaded file exists
+          if [ ! -f "$TEMP_DIR/$PLUGIN_FILE" ]; then
+            echo "Error: Plugin file not found in temporary directory"
+            ls -la $TEMP_DIR/
+            exit 1
+          fi
+          
+          if [ ! -d "$PLUGIN_DIR_INSTANCES" ]; then
+            echo "$PLUGIN_DIR_INSTANCES does not exist."
+          fi
+          
+          # Move the plugin file to the final location
+          sudo cp "$TEMP_DIR/$PLUGIN_FILE" "$PLUGIN_DIR_INSTANCES/"
+          
+          # Set proper ownership and permissions
+          sudo chown pterodactyl:pterodactyl "$PLUGIN_DIR_INSTANCES/$PLUGIN_FILE" 2>/dev/null || true
+          sudo chmod 644 "$PLUGIN_DIR_INSTANCES/$PLUGIN_FILE"
 
-    - name: Deploy to Towny Server
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.PROD_HOST }}
-        username: ${{ secrets.PROD_USERNAME }}
-        key: ${{ secrets.PROD_SSH_KEY }}
-        port: ${{ secrets.PROD_PORT }}
-        source: "target/ClassX-*.jar"
-        target: "/var/lib/pterodactyl/volumes/58874410-387a-44a5-bb01-6664c913ed1c/plugins/"  # Your production server path
-        strip_components: 1
-    
-    
+          PLUGIN_DIR_TOWNY="/var/lib/pterodactyl/volumes/${{ secrets.TOWNY_SERVER_ID }}/plugins"
+
+          if [ ! -d "$PLUGIN_DIR_TOWNY" ]; then
+            echo "$PLUGIN_DIR_TOWNY does not exist."
+          fi
+          
+          # Move the plugin file to the final location
+          sudo cp "$TEMP_DIR/$PLUGIN_FILE" "$PLUGIN_DIR_TOWNY/"
+          
+          # Set proper ownership and permissions
+          sudo chown pterodactyl:pterodactyl "$PLUGIN_DIR_TOWNY/$PLUGIN_FILE" 2>/dev/null || true
+          sudo chmod 644 "$PLUGIN_DIR_TOWNY/$PLUGIN_FILE"
+          
+          # Clean up temporary files
+          rm -rf "$TEMP_DIR"
+          
+          # Verify deployment
+          echo "Plugin deployed successfully:"
+          sudo ls -la "$PLUGIN_DIR_INSTANCES/$PLUGIN_FILE"
+          sudo ls -la "$PLUGIN_DIR_TOWNY/$PLUGIN_FILE"
