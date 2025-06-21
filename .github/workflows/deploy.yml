@@ -23,20 +23,6 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-
-    - name: Set up Maven authentication
-      run: |
-        mkdir -p ~/.m2
-        echo '<settings>
-          <servers>
-            <server>
-              <id>github</id>
-              <username>${{ github.actor }}</username>
-              <password>${{ secrets.PACKAGES_TOKEN }}</password>
-            </server>
-          </servers>
-        </settings>' > ~/.m2/settings.xml
-
         
     - name: Cache Maven dependencies
       uses: actions/cache@v3
@@ -54,6 +40,9 @@ jobs:
         ARTIFACT_NAME=$(mvn help:evaluate -Dexpression=project.build.finalName -q -DforceStdout)
         echo "artifact_name=${ARTIFACT_NAME}.jar" >> $GITHUB_OUTPUT
         echo "Found artifact: ${ARTIFACT_NAME}.jar"
+        BASE_NAME=$(mvn help:evaluate -Dexpression=project.name -q -DforceStdout)
+        echo "base_name=${BASE_NAME}" >> $GITHUB_OUTPUT
+        echo "Base name: ${BASE_NAME}"
         
     - name: Verify artifact exists
       run: |
@@ -97,7 +86,9 @@ jobs:
           # Define paths
           TEMP_DIR="/tmp/minecraft-plugin-deploy"
           PLUGIN_DIR_INSTANCES="/var/lib/pterodactyl/volumes/${{ secrets.INSTANCES_SERVER_ID }}/plugins"
+          PLUGIN_DIR_TOWNY="/var/lib/pterodactyl/volumes/${{ secrets.TOWNY_SERVER_ID }}/plugins"
           PLUGIN_FILE="${{ steps.get-artifact.outputs.artifact_name }}"
+          BASE_NAME="${{ steps.get-artifact.outputs.base_name }}"
           
           # Check if the uploaded file exists
           if [ ! -f "$TEMP_DIR/$PLUGIN_FILE" ]; then
@@ -105,9 +96,20 @@ jobs:
             ls -la $TEMP_DIR/
             exit 1
           fi
+
+          echo "Looking for existing versions of plugin with base name: $BASE_NAME in INSTANCES server"
+          OLD_PLUGINS=$(sudo find "$PLUGIN_DIR_INSTANCES" -name "${BASE_NAME}*.jar" -type f 2>/dev/null || true)
           
-          if [ ! -d "$PLUGIN_DIR_INSTANCES" ]; then
-            echo "$PLUGIN_DIR_INSTANCES does not exist."
+          if [ -n "$OLD_PLUGINS" ]; then
+            echo "Found existing plugin versions:"
+            echo "$OLD_PLUGINS"
+          
+            # Remove old versions
+            echo "Removing old plugin versions..."
+            sudo rm -f $OLD_PLUGINS
+            echo "Old versions removed successfully"
+          else
+            echo "No existing plugin versions found in INSTANCES server"
           fi
           
           # Move the plugin file to the final location
@@ -117,10 +119,19 @@ jobs:
           sudo chown pterodactyl:pterodactyl "$PLUGIN_DIR_INSTANCES/$PLUGIN_FILE" 2>/dev/null || true
           sudo chmod 644 "$PLUGIN_DIR_INSTANCES/$PLUGIN_FILE"
 
-          PLUGIN_DIR_TOWNY="/var/lib/pterodactyl/volumes/${{ secrets.TOWNY_SERVER_ID }}/plugins"
-
-          if [ ! -d "$PLUGIN_DIR_TOWNY" ]; then
-            echo "$PLUGIN_DIR_TOWNY does not exist."
+          echo "Looking for existing versions of plugin with base name: $BASE_NAME in TOWNY server"
+          OLD_PLUGINS=$(sudo find "$PLUGIN_DIR_TOWNY" -name "${BASE_NAME}*.jar" -type f 2>/dev/null || true)
+          
+          if [ -n "$OLD_PLUGINS" ]; then
+            echo "Found existing plugin versions:"
+            echo "$OLD_PLUGINS"
+          
+            # Remove old versions
+            echo "Removing old plugin versions..."
+            sudo rm -f $OLD_PLUGINS
+            echo "Old versions removed successfully"
+          else
+            echo "No existing plugin versions found in TOWNY server"
           fi
           
           # Move the plugin file to the final location
