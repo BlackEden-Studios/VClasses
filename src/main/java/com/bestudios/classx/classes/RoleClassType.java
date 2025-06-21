@@ -11,6 +11,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,10 +23,136 @@ import java.util.Objects;
 
 public class RoleClassType extends ConfigLoader {
 
+    static File classesDir;
+
+    static {
+        classesDir = new File(ClassX.getInstance().getDataFolder(), "classes");
+        if (!classesDir.exists()) {
+            if (classesDir.mkdirs()) {
+                ClassX.getInstance().toLog("Created classes directory");
+            } else {
+                ClassX.getInstance().toLog("Failed to create classes directory");
+            }
+        }
+    }
+
     RoleClassType(String dedicatedFile, RoleClassEnum newClass) {
-        super(ClassX.getInstance().getDataFolder(), dedicatedFile, "ClassX");
+        super(classesDir, dedicatedFile, "ClassX");
         thisClass = newClass;
         debug = ClassX.getInstance().isDebugMode();
+
+        // Base configurations for the class
+        try {
+            File configFile = new File(classesDir, "config.yml");
+            // Create file if it doesn't exist
+            if (!Files.exists(configFile.toPath())) {
+                String defaultYml = """
+                class_type:
+                  equip:
+                    head:
+                    - minecraft:leather_helmet
+                    - minecraft:chainmail_helmet
+                    - minecraft:iron_helmet
+                    - minecraft:diamond_helmet
+                    - minecraft:golden_helmet
+                    - minecraft:netherite_helmet
+                    - minecraft:turtle_helmet
+                    chest:
+                    - minecraft:leather_chestplate
+                    - minecraft:chainmail_chestplate
+                    - minecraft:iron_chestplate
+                    - minecraft:diamond_chestplate
+                    - minecraft:golden_chestplate
+                    - minecraft:netherite_chestplate
+                    legs:
+                    - minecraft:leather_leggings
+                    - minecraft:chainmail_leggings
+                    - minecraft:iron_leggings
+                    - minecraft:diamond_leggings
+                    - minecraft:golden_leggings
+                    - minecraft:netherite_leggings
+                    feet:
+                    - minecraft:leather_boots
+                    - minecraft:chainmail_boots
+                    - minecraft:iron_boots
+                    - minecraft:diamond_boots
+                    - minecraft:golden_boots
+                    - minecraft:netherite_boots
+                  effect:
+                    absorption:
+                      level: 0
+                    bad_omen:
+                      level: 0
+                    blindness:
+                      level: 0
+                    conduit_power:
+                      level: 0
+                    darkness:
+                      level: 0
+                    dolphins_grace:
+                      level: 0
+                    fire_resistance:
+                      level: 0
+                    glowing:
+                      level: 0
+                    haste:
+                      level: 0
+                    health_boost:
+                      level: 0
+                    hero_of_the_village:
+                      level: 0
+                    hunger:
+                      level: 0
+                    instant_damage:
+                      level: 0
+                    instant_health:
+                      level: 0
+                    invisibility:
+                      level: 0
+                    jump_boost:
+                      level: 0
+                    levitation:
+                      level: 0
+                    luck:
+                      level: 0
+                    mining_fatigue:
+                      level: 0
+                    nausea:
+                      level: 0
+                    night_vision:
+                      level: 0
+                    poison:
+                      level: 0
+                    regeneration:
+                      level: 0
+                    resistance:
+                      level: 0
+                    saturation:
+                      level: 0
+                    slow_falling:
+                      level: 0
+                    slowness:
+                      level: 0
+                    speed:
+                      level: 0
+                    strength:
+                      level: 0
+                    unluck:
+                      level: 0
+                    water_breathing:
+                      level: 0
+                    weakness:
+                      level: 0
+                    wither:
+                      level: 0
+                """;
+
+                Files.writeString(configFile.toPath(), defaultYml);
+                System.out.println("Created default config for " + dedicatedFile);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Could not create default file for " + dedicatedFile, e);
+        }
 
         this.classConfiguration();
         this.classAbility();

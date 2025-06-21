@@ -5,12 +5,14 @@ import com.bestudios.classx.classes.*;
 import com.bestudios.classx.managers.ArmorListener;
 import com.bestudios.classx.managers.ClassXSettingsManager;
 import com.bestudios.classx.managers.CommandsManager;
+import com.bestudios.classx.managers.DefaultLanguageManager;
 import com.bestudios.classx.util.ClassActivationQueue;
 import com.bestudios.corex.CoreX;
 import com.bestudios.corex.basics.BEPlugin;
 import com.bestudios.corex.managers.CoreXSettingsManager;
 import com.bestudios.corex.utils.LanguageManager;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +53,10 @@ public final class ClassX extends BEPlugin {
         ClassX.getInstance().setDebugMode( ClassXSettingsManager.getInstance().getDebugConfig() );
         ClassX.getInstance().toLog("Debug mode detected", ClassX.getInstance().isDebugMode());
 
+        // Languages startup
+        DefaultLanguageManager.createDefaultConfig();
         LANGUAGES = new LanguageManager(
-                getDataFolder(),
+                new File(getDataFolder() + File.separator + "languages" + File.separator),
                 CoreXSettingsManager.getInstance().getConfig().getString("language" , "en") + ".yml",
                 "ClassX"
         );

@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.bestudios</groupId>
-  <artifactId>ClassX</artifactId>
-  <version>0.9-BETA</version>
+  <artifactId>classx</artifactId>
+  <version>0.10-BETA</version>
   <packaging>jar</packaging>
 
   <name>ClassX</name>
@@ -19,6 +19,7 @@
     <url>https://github.com/BlackEden-Studios</url>
 
     <build>
+    <finalName>${project.name}-${project.version}</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -102,7 +103,7 @@
       <dependency>
           <groupId>com.bestudios</groupId>
           <artifactId>corex</artifactId>
-          <version>0.4</version>
+          <version>0.4-BETA</version>
           <scope>provided</scope>
       </dependency>
   </dependencies>

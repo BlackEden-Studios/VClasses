@@ -43,9 +43,9 @@ public class BardBuffRunnable extends BukkitRunnable {
     @Override
     public void run() {
         player.addPotionEffect(effect);
+        Collection<? extends Land> bardPlayerLandCollection = api.getLandPlayer(player.getUniqueId()).getLands();
         for (Entity e : player.getNearbyEntities(range,range,range)) {
-            if (e instanceof Player found ) {
-                Collection<? extends Land> bardPlayerLandCollection = api.getLandPlayer(player.getUniqueId()).getLands();
+            if (e instanceof Player found) {
                 Collection<? extends Land> foundPlayerLandCollection = api.getLandPlayer(found.getUniqueId()).getLands();
                 for (Land bardLand : bardPlayerLandCollection) {
                     for (Land foundPlayerLand : foundPlayerLandCollection) {
