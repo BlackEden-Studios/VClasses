@@ -43,7 +43,7 @@ public class RoleClassType extends ConfigLoader {
 
         // Base configurations for the class
         try {
-            File configFile = new File(classesDir, "config.yml");
+            File configFile = new File(classesDir, dedicatedFile);
             // Create file if it doesn't exist
             if (!Files.exists(configFile.toPath())) {
                 String defaultYml = """
