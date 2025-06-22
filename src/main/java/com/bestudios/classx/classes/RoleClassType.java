@@ -14,6 +14,7 @@ import org.bukkit.potion.PotionEffect;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,16 +24,13 @@ import java.util.Objects;
 
 public class RoleClassType extends ConfigLoader {
 
-    static File classesDir;
+    static File classesDir = new File(ClassX.getInstance().getDataFolder() + File.separator + "Classes");
 
     static {
-        classesDir = new File(ClassX.getInstance().getDataFolder(), "classes");
-        if (!classesDir.exists()) {
-            if (classesDir.mkdirs()) {
-                ClassX.getInstance().toLog("Created classes directory");
-            } else {
-                ClassX.getInstance().toLog("Failed to create classes directory");
-            }
+        try {
+            Files.createDirectories(classesDir.toPath());
+        } catch (IOException e) {
+            ClassX.getInstance().toLog("Could not create class folder");
         }
     }
 
@@ -148,7 +146,7 @@ public class RoleClassType extends ConfigLoader {
                 """;
 
                 Files.writeString(configFile.toPath(), defaultYml);
-                System.out.println("Created default config for " + dedicatedFile);
+                ClassX.getInstance().toLog("Created default config for " + dedicatedFile);
             }
         } catch (IOException e) {
             throw new RuntimeException("Could not create default file for " + dedicatedFile, e);

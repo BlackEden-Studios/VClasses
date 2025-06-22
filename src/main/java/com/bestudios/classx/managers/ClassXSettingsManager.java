@@ -6,10 +6,10 @@ import com.bestudios.corex.basics.ConfigLoader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ClassXSettingsManager extends ConfigLoader {
+
     private final static ClassXSettingsManager instance = new ClassXSettingsManager();
     /* Private Constructor */
     private ClassXSettingsManager() {
@@ -32,9 +32,10 @@ public class ClassXSettingsManager extends ConfigLoader {
 
         // Default config values
         try {
+            Files.createDirectories(Paths.get(String.valueOf(ClassX.getInstance().getDataFolder())));
             File configFile = new File(ClassX.getInstance().getDataFolder(), "config.yml");
             // Create file if it doesn't exist
-            if (!Files.exists(configFile.toPath())) {
+            if (!configFile.exists()) {
                 String defaultYml = """
                 debug: false
                 max_activation_queue_operations: 5
