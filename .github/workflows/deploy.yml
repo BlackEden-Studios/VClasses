@@ -24,6 +24,19 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         
+    - name: Set up Maven authentication
+      run: |
+        mkdir -p ~/.m2
+        echo '<settings>
+          <servers>
+            <server>
+              <id>github</id>
+              <username>${{ github.actor }}</username>
+              <password>${{ secrets.PACKAGES_TOKEN }}</password>
+            </server>
+          </servers>
+        </settings>' > ~/.m2/settings.xml
+        
     - name: Cache Maven dependencies
       uses: actions/cache@v3
       with:
