@@ -1,10 +1,9 @@
 package com.bestudios.classx.classes;
 
 import com.bestudios.classx.ClassX;
-import com.bestudios.classx.managers.ClassXSettingsManager;
 import com.bestudios.classx.caches.PlayersCache;
 import com.bestudios.classx.util.BardBuffRunnable;
-import com.bestudios.corex.managers.HooksManager;
+import com.bestudios.corex.services.HooksManager;
 import com.bestudios.corex.caches.SmartCache;
 import com.bestudios.corex.basics.TimerInfo;
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
@@ -25,10 +24,19 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
+
+/**
+ * This class implements the Bard class functionality.
+ * It handles the bard's abilities, cooldowns, and buffs applied to players.
+ * The class is designed as a Singleton to ensure only one instance exists.
+ */
 public class BardClass extends RoleClassType {
 
     /**
@@ -49,48 +57,61 @@ public class BardClass extends RoleClassType {
 
 
 
-    /**
-     *  @rightClickCooldownTime  Cooldown time for the right click ability, expressed in seconds
-     *  @defaultBuffDuration     Normal ability effect duration, expressed in seconds
-     *  @amplifiedBuffDuration   Right-click ability effect duration, expressed in seconds
-     *  @buffRange               Normal and right-click abilities applying range, expressed in blocks
-     */
+    /** Cooldown time for the right click ability, expressed in seconds */
     private int rightClickCooldownTime = 20;
+    /** Normal ability effect duration, expressed in seconds */
     private int defaultBuffDuration = 2;
+    /** Amplified ability effect duration, expressed in seconds */
     private int amplifiedBuffDuration = 10;
+    /** Range for the buffs applied by the bard, expressed in blocks */
     private double buffRange = 20;
 
     /**
      *  Smart cache for the ability runnables
      */
     private final SmartCache<BardBuffRunnable> bardBuffsCache = new SmartCache<>();
+    /** List of implemented buffs */
+    private final Map<String, PotionEffectType> buffTypes = Map.of(
+            "speed", PotionEffectType.SPEED,
+            "strength", PotionEffectType.STRENGTH,
+            "haste", PotionEffectType.HASTE,
+            "regeneration", PotionEffectType.REGENERATION
+    );
+    /**
+     * Amplifiers for the bard's buffs, indexed by 0 for normal and 1 for amplified
+     */
+    private final Map<String, Vector<Integer>> amplifiersCache = Map.of(
+            "speed", new Vector<>(Arrays.asList(0, 1)),
+            "strength", new  Vector<>(Arrays.asList(0, 1)),
+            "haste", new  Vector<>(Arrays.asList(0, 1)),
+            "regeneration", new Vector<>(Arrays.asList(0, 1))
+    );
 
     /**
-     *  Amplifiers for the bard ability potion effects
+     * Dismisses the role class for a player.
+     * @param player the player whose role class is being dismissed
      */
-    private final Vector<Integer> speed_amplifiers = new Vector<Integer>(Arrays.asList(0, 1));
-    private final Vector<Integer> strength_amplifiers = new Vector<Integer>(Arrays.asList(0, 1));
-    private final Vector<Integer> haste_amplifiers = new Vector<Integer>(Arrays.asList(0, 1));
-    private final Vector<Integer> regeneration_amplifiers = new Vector<Integer>(Arrays.asList(0, 1));
-
-
-
     @Override
     public void dismissRoleClass(Player player) {
         cancelAbilityTask(player);
     }
 
+    /**
+     * Registers the class abilities for the Bard class.
+     */
     @Override
     public void classAbility() {
-
+        // Register the horn held ability
         hornHeldAbility();
+        // Register the horn right-click ability
         hornRightClickAbility();
-
+        // Register the listener for player death
         ClassX.getInstance().getPluginManager().registerEvents(new Listener() {
             @EventHandler (priority = EventPriority.HIGH)
             public void onWeakDeath(EntityDeathEvent event) {
                 if (event.isCancelled()) return;
                 if (event.getEntity() instanceof Player deadPlayer) {
+                    // If the player is a bard, cancel their ability task
                     cancelAbilityTask(deadPlayer);
                 }
             }
@@ -99,43 +120,44 @@ public class BardClass extends RoleClassType {
 
     }
 
+    /**
+     * Sets up the configurations for the Bard class.
+     * This method retrieves configuration values from the YAML file and initializes class variables.
+     */
     @Override
     public void setUpConfigs() {
         super.setUpConfigs();
 
-        YamlConfiguration config = ClassXSettingsManager.getInstance().getConfig();
+        YamlConfiguration config = ClassX.getInstance().getSettingsManager().getConfig();
 
-        buffRange = config.getInt("bard_class_effect_range");
+        buffRange = config.getInt("bard.effect_range", 20);
 
-        defaultBuffDuration = config.getInt("bard_class_default_effect_duration");
-        amplifiedBuffDuration = config.getInt("bard_class_amplified_effect_duration");
+        defaultBuffDuration = config.getInt("bard.default_effect_duration", 5);
+        amplifiedBuffDuration = config.getInt("bard.amplified_effect_duration", 10);
 
-        rightClickCooldownTime = config.getInt("bard_class_horn_usage_cooldown");
+        rightClickCooldownTime = config.getInt("bard.horn_usage_cooldown", 60);
 
-        speed_amplifiers.set( 0, config.getInt("bard_class_speed_effect") - 1);
-        speed_amplifiers.set( 1, config.getInt("bard_class_amplified_speed_effect") - 1);
-
-        strength_amplifiers.set( 0, config.getInt("bard_class_strength_effect") - 1);
-        strength_amplifiers.set( 1, config.getInt("bard_class_amplified_strength_effect") - 1);
-
-        haste_amplifiers.set( 0, config.getInt("bard_class_haste_effect") - 1);
-        haste_amplifiers.set( 1, config.getInt("bard_class_amplified_haste_effect") - 1);
-
-        regeneration_amplifiers.set( 0, config.getInt("bard_class_regeneration_effect") - 1);
-        regeneration_amplifiers.set( 1, config.getInt("bard_class_amplified_regeneration_effect") - 1);
+        // Initialize the amplifiers for the bard's buffs
+        for (Map.Entry<String, Vector<Integer>> entry : amplifiersCache.entrySet()) {
+            String key = entry.getKey();
+            Vector<Integer> amplifiers = entry.getValue();
+            amplifiers.set(0, config.getInt("bard." + key + "_effect", 2) - 1);
+            amplifiers.set(1, config.getInt("bard.amplified_" + key + "_effect", 3) - 1);
+        }
     }
 
     /**
      *  Internal procedure for correctly dismiss a cached runnable
-     *  @param player
+     *  @param player the player whose ability task is being canceled
      */
     private void cancelAbilityTask(Player player) {
         try {
             bardBuffsCache.remove(player.getUniqueId());
         } catch (Exception ignored) {
-            ClassX.getInstance().toLog("Caught an exception when trying " +
+            ClassX.getInstance().toLog(
+                    "Caught an exception when trying " +
                     "to cancel the bard buff runnable for player " +
-                    player.getName(), debug);
+                    player.getName(), ClassX.getInstance().isDebugMode());
         }
     }
 
@@ -154,7 +176,7 @@ public class BardClass extends RoleClassType {
                 if (event.isCancelled()) return;
                 if (PlayersCache.getInstance().getPlayerCache(player.getUniqueId()).getCurrentClass() != RoleClassEnum.BARD) return;
                 TimerInfo timer = cooldownCache.get(player.getUniqueId());
-                if (timer.getDuration() == ClassXSettingsManager.getInstance().getClassActivationCooldown() && timer.isValid()) return;
+                if (timer.getDuration() == ClassX.getInstance().getConfig().getInt("class_activation_cooldown", 1) && timer.isValid()) return;
                 selectHorn(player, itemHeld, defaultBuffDuration, EFFECT_TYPE.BASE, true);
             }
 
@@ -187,7 +209,7 @@ public class BardClass extends RoleClassType {
                     // Check the cooldown
                     TimerInfo entry = cooldownCache.get(player.getUniqueId());
                     if (entry != null && entry.isValid()) {
-                        player.sendMessage(Component.text(ClassX.LANGUAGES.getMessage("bard.horn_cooldown_message"))
+                        player.sendMessage(Component.text(ClassX.getInstance().getLanguageManager().getMessage("bard.horn_cooldown_message"))
                                                     .color(TextColor.color(0xff0000))
                                                     .hoverEvent(HoverEvent.hoverEvent(HoverEvent.Action.SHOW_TEXT,
                                                                                       Component.text("Bard Class")
@@ -206,44 +228,36 @@ public class BardClass extends RoleClassType {
 
     /**
      * Internal procedure for the correct effect selection before scheduling the dedicated runnable
-     * @param player
-     * @param itemHeld
-     * @param buffDuration
-     * @param effectType
-     * @param refreshable
+     * @param player the player to apply the buff to
+     * @param itemHeld the item held by the player, which should be a horn
+     * @param buffDuration the duration of the buff to apply, expressed in seconds
+     * @param effectType the type of effect to apply, either BASE or AMPLIFIED
+     * @param refreshable whether the buff is refreshable or not
      */
     private void selectHorn(Player player, ItemStack itemHeld, int buffDuration, EFFECT_TYPE effectType, boolean refreshable) {
 
         String name = HooksManager.getItemName(itemHeld);
-        PotionEffectType effect = null;
+
         int amplifierIndex = effectType.equals(EFFECT_TYPE.AMPLIFIED) ? 1 : 0;
-        Vector<Integer> amplifierCache = null;
-
-        if (name.contains("speed")) {
-            effect = PotionEffectType.SPEED;
-            amplifierCache = speed_amplifiers;
-        } else if (name.contains("strength")) {
-            effect = PotionEffectType.STRENGTH;
-            amplifierCache = strength_amplifiers;
-        } else if (name.contains("haste")) {
-            effect = PotionEffectType.HASTE;
-            amplifierCache = haste_amplifiers;
-        } else if (name.contains("regen")) {
-            effect = PotionEffectType.REGENERATION;
-            amplifierCache = regeneration_amplifiers;
-        }
-
-        if (effect != null && amplifierCache != null) {
-            PotionEffect potion = new PotionEffect(effect, 20 * buffDuration, amplifierCache.get(amplifierIndex));
-            taskProcedure(player, potion, refreshable);
+        for (Map.Entry<String, PotionEffectType> entry : buffTypes.entrySet()) {
+            String key = entry.getKey();
+            if (name.contains(key)) {
+                PotionEffect potion = new PotionEffect(
+                        entry.getValue(),
+                        20 * buffDuration,
+                        amplifiersCache.get(key).get(amplifierIndex)
+                );
+                taskProcedure(player, potion, refreshable);
+                break;
+            }
         }
     }
 
     /**
      * Internal procedure for the scheduling of a correct Bard Buff Runnable
-     * @param player
-     * @param effect
-     * @param refreshable
+     * @param player the player to apply the buff to
+     * @param effect the potion effect to apply
+     * @param refreshable whether the buff is refreshable or not
      */
     private void taskProcedure(Player player, PotionEffect effect, boolean refreshable) {
         BardBuffRunnable task = new BardBuffRunnable(player, effect, buffRange);

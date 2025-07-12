@@ -1,5 +1,13 @@
 package com.bestudios.classx.classes;
 
+
+/**
+ * This class represents a role class that does not have any specific attributes or abilities.
+ * It is used as a placeholder for cases where no role class is applicable.
+ *
+ * @version 1.0
+ * @since 1.0
+ */
 public class NoneClass extends RoleClassType {
 
     /**

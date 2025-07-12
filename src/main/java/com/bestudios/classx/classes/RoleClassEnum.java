@@ -1,7 +1,9 @@
 package com.bestudios.classx.classes;
 
 /**
-    Enumeration class that should hold an entry for every implemented role class
+ * Enum representing different role classes in the game.
+ * Each role corresponds
+ * to a specific class type with unique abilities.
  */
 public enum RoleClassEnum {
     NONE,

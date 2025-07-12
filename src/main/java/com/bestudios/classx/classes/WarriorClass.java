@@ -1,5 +1,14 @@
 package com.bestudios.classx.classes;
 
+
+/**
+ * Class representing the Warrior class in the game.
+ * This class extends RoleClassType and is designed to be a Singleton.
+ * It initializes with a specific configuration file and role class type.
+ *
+ * @version 1.0
+ * @since 1.0
+ */
 public class WarriorClass extends RoleClassType {
 
     /**
