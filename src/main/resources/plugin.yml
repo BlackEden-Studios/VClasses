@@ -1,22 +1,21 @@
-name: ClassX
+name: VClasses
 version: '${version}'
-main: com.bestudios.classx.ClassX
-api-version: '1.20.6'
-depend: [CoreX]
-prefix: ClassX
+main: com.bestudios.vclasses.VClasses
+api-version: '1.21.10'
+depend: [Fulcrum]
+prefix: VClasses
 authors: [Bestialus]
 description: A new way to define your own custom role classes (part of the CraftX plugins family)
 website: https://github.com/BlackEden-Studios
 
 commands:
-  classx:
-    description: Main command for ClassX
+  debug:
+    description: Toggles debug mode
     usage: /<command> <subcommand>
-    aliases: [cx]
-    permission: classx.use
+    permission: vclasses.op
     permission-message: You do not have permission to use this command.
 
 permissions:
-  classx.use:
-    description: Allows the use of ClassX commands
+  vclasses.op:
+    description: Allows the use of VClasses commands
     default: op

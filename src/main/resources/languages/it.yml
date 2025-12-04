@@ -1,0 +1,8 @@
+class:
+  activation:
+    success: "Le caratteristiche di classe sono ora attive!"
+  action:
+    not_allowed: "Non puoi farlo adesso!"
+bard:
+  horn:
+    cooldown_message: "Il corno è in cooldown"

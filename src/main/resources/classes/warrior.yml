@@ -1,0 +1,49 @@
+class_type:
+  equip:
+    head:
+      - armor:warrior_helmet
+      - armor:paladin_helmet
+    chest:
+      - armor:warrior_chestplate
+      - armor:paladin_chestplate
+    legs:
+      - armor:warrior_leggings
+      - armor:paladin_leggings
+    feet:
+      - armor:warrior_boots
+      - armor:paladin_boots
+  effect:
+    level:
+      absorption: 0
+      bad_omen: 0
+      blindness: 0
+      conduit_power: 0
+      darkness: 0
+      dolphins_grace: 0
+      fire_resistance: 0
+      glowing: 0
+      haste: 0
+      health_boost: 0
+      hero_of_the_village: 0
+      hunger: 0
+      instant_damage: 0
+      instant_health: 0
+      invisibility: 0
+      jump_boost: 0
+      levitation: 0
+      luck: 0
+      mining_fatigue: 0
+      nausea: 0
+      night_vision: 0
+      poison: 0
+      regeneration: 0
+      resistance: 0
+      saturation: 0
+      slow_falling: 0
+      slowness: 0
+      speed: 0
+      strength: 0
+      unluck: 0
+      water_breathing: 0
+      weakness: 0
+      wither: 0

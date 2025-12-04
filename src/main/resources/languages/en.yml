@@ -1,0 +1,8 @@
+class:
+  activation:
+    success: "Class abilities are now active!"
+  action:
+    not_allowed: "You can't do it right now"
+bard:
+  horn:
+    cooldown_message: "The horn is on cooldown"

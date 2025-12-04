@@ -1,6 +1,0 @@
-class_activation_success: Le caratteristiche di classe sono ora attive!
-class_action_not_allowed: Non hai l'armatura adatta
-bard:
-  horn_cooldown_message: Il corno è in cooldown
-rogue:
-  knife_cooldown_message: Il coltello è in cooldown

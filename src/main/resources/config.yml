@@ -1,42 +1,53 @@
-debug: false
+version: 0.1
+debug: true
+language: en
 max_activation_queue_operations: 5
-class_activation_cooldown: 10
-##############################################################
-#                       Archer Class                         #
-##############################################################
-archer_class_tag_time: 10
-# Damage multiplier should be an integer, the percentile is handled internally
-archer_class_damage_multiplier: 7
-##############################################################
-#                         Bard Class                         #
-##############################################################
-bard_class_effect_range: 20
-bard_class_default_effect_duration: 5
-bard_class_amplified_effect_duration: 10
-bard_class_horn_usage_cooldown: 60
-# Effects should be indicated as in-game values, real values are handled internally
-# E.G speed_effect: 1 for Speed Lvl 1
-bard_class_speed_effect: 2
-bard_class_amplified_speed_effect: 3
-bard_class_strength_effect: 2
-bard_class_amplified_strength_effect: 4
-bard_class_haste_effect: 2
-bard_class_amplified_haste_effect: 3
-bard_class_regeneration_effect: 2
-bard_class_amplified_regeneration_effect: 4
-##############################################################
-#                        Rogue Class                         #
-##############################################################
-rogue_class_knife_throw_cooldown: 3
-##############################################################
-#                       Warrior Class                        #
-##############################################################
-#No configurations available for warrior class
-##############################################################
-#                      Class Activators                      #
-##############################################################
-classes:
-  archer: true
-  bard: true
-  rogue: true
-  warrior: true
+class:
+  activation_cooldown: 10
+################
+# Archer Class #
+################
+  archer:
+    active: true
+    tag_time: 10
+    # Damage multiplier should be an integer, the percentile is handled internally
+    damage_multiplier: 7
+    buff:
+      type: "speed"
+      level: 2
+##############
+# Bard Class #
+##############
+  bard:
+    active: true
+    effect:
+      range: 20
+      default_duration: 5
+      amplified_duration: 10
+      speed:
+        level: 2
+        amplified: 3
+      strength:
+        level: 2
+        amplified: 4
+      haste:
+        level: 2
+        amplified: 3
+      regeneration:
+        level: 2
+        amplified: 4
+    horn_cooldown: 60
+###############
+# Rogue Class #
+###############
+  rogue:
+    active: true
+    knife:
+      throw_cooldown: 3
+#################
+# Warrior Class #
+#################
+  warrior:
+    active: true
+  # No configurations available for warrior class
+
