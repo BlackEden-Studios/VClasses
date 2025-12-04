@@ -9,9 +9,10 @@ import java.util.Map;
 
 public class EquipmentCache {
 
-    private RoleClassEnum currentClass;
-    private final Map<RoleClassEnum, Short> cache;
-    private final boolean debug;
+  /** The current role class of the player */
+  private RoleClassEnum currentClass;
+  /** The cache of the player's equipment */
+  private final Map<RoleClassEnum, Short> cache;
 
     /**
      *  Wrapper class that holds the information about a player equipment in relation of the role classes
