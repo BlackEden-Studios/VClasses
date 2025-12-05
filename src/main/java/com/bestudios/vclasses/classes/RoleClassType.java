@@ -162,7 +162,18 @@ public abstract class RoleClassType extends DefaultConfigurationHolder {
   /** Implementation of the specific class ability, called in the constructor */
   protected void abilityConfiguration() throws ClassLoadingException {}
 
-  /** Implementation of the specific class dismiss procedure */
+  /**
+   * Implementation of the specific class activation procedure
+   * @param player Player to be affected
+   */
+  public void activateRoleClass(Player player) {
+    player.addPotionEffects(classPotionEffectsPrivateCache);
+  }
+
+  /**
+   * Implementation of the specific class dismiss procedure
+   * @param player Player to be affected
+   */
   public void dismissRoleClass(Player player) {
     for(PotionEffect effect : classPotionEffectsPrivateCache)
       player.removePotionEffect(effect.getType());

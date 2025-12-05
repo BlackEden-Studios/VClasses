@@ -76,12 +76,12 @@ public class ArmorListener implements Listener {
     if (Objects.equals(newRole.toString(), oldRole.toString())) return;
 
     plugin.getLogger().config("Cache updated for " + player.getName() + " : " + oldRole + " -> " + newRole);
-    if (!PlayersCache.getPlayerCache(player.getUniqueId()).updateCache(newRole, oldRole)) return;
-
+    RoleClassEnum change = PlayersCache.getPlayerCache(player.getUniqueId()).updateCache(newRole, oldRole);
     // Logic to execute when a role-class change is caught
-    plugin.getLogger().config("Class for player " + player.getName() + " is changing to role-class " + newRole);
+    plugin.getLogger().config("Class for player " + player.getName() + " is changing to role-class " + change);
     // Dismiss the old role-class
     VClasses.implementedClasses.get(oldRole).dismissRoleClass(player);
+    if (change == RoleClassEnum.NONE) return;
     // Set the ability class on cooldown
     VClasses.implementedClasses.get(newRole).setCooldownForPlayer(player);
     // Queue activation

@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.github.blackeden-studios:fulcrum-api:0.1.3-BETA")
+    compileOnly("io.github.blackeden-studios:fulcrum-api:0.1.4-BETA")
 
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
     compileOnly("net.kyori:adventure-api:4.16.0")
